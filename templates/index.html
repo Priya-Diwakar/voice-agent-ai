@@ -3,73 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dhwani Bot</title> <link rel="preconnect" href="https://fonts.googleapis.com">
+    <title>Dhwani Bot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #000000; /* Solid Black Background */
+            background-color: #000000;
             color: #F9FAFB;
-            background: #1f8cb8;
             background: linear-gradient(57deg, rgba(31, 140, 184, 1) 0%, rgba(44, 95, 153, 1) 24%, rgba(68, 199, 66, 1) 48%, rgba(217, 62, 35, 1) 80%, rgba(194, 50, 50, 1) 100%);
         }
-
         .main-container {
-            background-color: rgba(13, 17, 23, 0.7); /* Dark semi-transparent card */
+            background-color: rgba(13, 17, 23, 0.7);
             backdrop-filter: blur(20px);
             border-radius: 24px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
-
         #aether-record-btn {
-            background-color: #8B5CF6; /* Purple */
+            background-color: #8B5CF6;
             transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
         }
-
         #aether-record-btn:hover:not(:disabled) {
-            background-color: #7C3AED; /* Darker Purple */
+            background-color: #7C3AED;
             transform: scale(1.05);
         }
-        
         #aether-record-btn:disabled {
-            background-color: #4B5563; /* Gray for disabled state */
+            background-color: #4B5563;
             cursor: not-allowed;
         }
-
         #aether-record-btn.is-recording {
             animation: pulse 2s infinite;
             box-shadow: 0 0 0 0 rgba(139, 92, 246, 1);
         }
-        
         @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 20px rgba(139, 92, 246, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
-            }
+            0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(139, 92, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
         }
-
-        #chat-history-container {
-            background-color: #0d1117;
-        }
-
+        #chat-history-container { background-color: #0d1117; }
         #chat-history-container::-webkit-scrollbar { width: 6px; }
         #chat-history-container::-webkit-scrollbar-track { background: #374151; }
         #chat-history-container::-webkit-scrollbar-thumb { background: #8B5CF6; border-radius: 10px; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
-
     <div class="main-container w-full max-w-2xl p-8 flex flex-col">
         <div class="text-center mb-6">
-            <h1 class="text-4xl font-bold text-white">SonixAI Bot</h1> <p class="text-lg text-gray-400 mt-1">Ask questions using your voice and get responses in speech.</p>
+            <h1 class="text-4xl font-bold text-white">SonixAI Bot</h1>
+            <p class="text-lg text-gray-400 mt-1">Ask questions using your voice and get responses in speech.</p>
         </div>
 
         <div class="mb-6 flex flex-col items-center">
@@ -78,13 +62,12 @@
         </div>
 
         <div class="flex flex-col items-center justify-center my-6">
-            <button id="aether-record-btn" class="w-24 h-24 rounded-full flex items-center justify-center text-white">
-            </button>
+            <button id="aether-record-btn" class="w-24 h-24 rounded-full flex items-center justify-center text-white"></button>
             <p id="agent-status" class="mt-4 text-center text-gray-300 h-6">Ready</p>
         </div>
 
         <div id="agent-error-box" class="hidden flex items-center gap-3 p-3 mb-4 text-sm text-red-300 bg-red-900/60 rounded-lg border border-red-800">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle flex-shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
             <span id="agent-error-text">An unexpected error occurred.</span>
         </div>
 
@@ -93,14 +76,156 @@
         </div>
 
         <div class="mt-6 text-center">
-            <button id="agent-clear-btn" class="py-2 px-5 bg-slate-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-md hover:scale-105 active:scale-95 transform transition-all duration-150 ease-in-out">
-                Clear Chat
-            </button>
+            <button id="agent-clear-btn" class="py-2 px-5 bg-slate-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-md hover:scale-105 active:scale-95 transform transition-all duration-150 ease-in-out">Clear Chat</button>
         </div>
     </div>
 
     <div id="audio-playback-container" class="hidden"></div>
-    
-    <script src="/static/index.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const agentVoiceSelect = document.getElementById('agent-voice-select');
+        const aetherRecordBtn = document.getElementById('aether-record-btn');
+        const agentStatus = document.getElementById('agent-status');
+        const agentClearBtn = document.getElementById('agent-clear-btn');
+        const chatHistoryContainer = document.getElementById('chat-history-container');
+        const emptyChatMessage = document.getElementById('empty-chat-message');
+        const agentErrorBox = document.getElementById('agent-error-box');
+        const agentErrorText = document.getElementById('agent-error-text');
+        const audioPlaybackContainer = document.getElementById('audio-playback-container');
+
+        let agentMediaRecorder;
+        let agentAudioChunks = [];
+        let isAgentRecording = false;
+        let sessionId = null;
+
+        const micIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>`;
+        const stopIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1"><rect width="8" height="8" x="8" y="8" rx="1"/></svg>`;
+
+        const showAgentError = (message) => { agentErrorText.textContent = message; agentErrorBox.classList.remove('hidden'); };
+        const hideAgentError = () => agentErrorBox.classList.add('hidden');
+
+        const fetchVoices = async () => {
+            try {
+                const response = await fetch('/voices');
+                if (!response.ok) throw new Error('Failed to fetch voices.');
+                const voices = await response.json();
+                console.log("🎤 All Voices:", voices);
+                agentVoiceSelect.innerHTML = '';
+                const defaultVoice_id = "en-US-katie";
+                voices.forEach(voice => {
+                    if (!voice.display_name.includes('child')) {
+                        const option = document.createElement('option');
+                        option.value = voice.voice_id;
+                        option.textContent = `${voice.display_name} (${voice.gender})`;
+                        if (voice.voice_id === defaultVoice_id) option.selected = true;
+                        agentVoiceSelect.appendChild(option);
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching voices:', error);
+                showAgentError(`Could not load voices.`);
+            }
+        };
+
+        const ws = new WebSocket("ws://127.0.0.1:8000/ws");
+
+        ws.onopen = () => console.log("WebSocket connected!");
+       ws.onmessage = (event) => {
+    let data;
+    try {
+        data = JSON.parse(event.data); // try JSON
+    } catch {
+        data = { text: event.data }; // fallback to plain text
+    }
+
+    if (data.text) {
+        addChatMessage("SonixAI Bot", data.text);
+    } else {
+        console.warn("Unexpected data:", data);
+    }
+};
+
+
+        function sendMessageToWS(message) {
+            if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(message));
+        }
+
+        const addChatMessage = (role, text) => {
+            if (emptyChatMessage) emptyChatMessage.style.display = "none";
+            const turnContainer = document.createElement('div');
+            turnContainer.innerHTML = `<p><span class="font-bold ${role === "SonixAI Bot" ? "text-purple-400" : "text-gray-300"}">${role}:</span> <span class="text-gray-200">${text}</span></p>`;
+            chatHistoryContainer.appendChild(turnContainer);
+            chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+        };
+
+        const initSession = async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            sessionId = urlParams.get('session_id') || crypto.randomUUID();
+            window.history.replaceState({}, '', `/?session_id=${sessionId}`);
+        };
+
+        const clearAgentChat = async () => {
+            if (!sessionId) return;
+            await fetch(`/agent/chat/${sessionId}`, { method: 'DELETE' });
+            chatHistoryContainer.innerHTML = '';
+            agentStatus.textContent = 'Ready';
+            sessionId = crypto.randomUUID();
+            window.history.replaceState({}, '', `/?session_id=${sessionId}`);
+        };
+
+        const startAgentRecording = async () => {
+            if (isAgentRecording) return;
+            hideAgentError();
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                agentMediaRecorder = new MediaRecorder(stream);
+                agentAudioChunks = [];
+                isAgentRecording = true;
+
+                agentMediaRecorder.addEventListener('dataavailable', e => agentAudioChunks.push(e.data));
+                agentMediaRecorder.addEventListener('stop', () => {
+                    const audioBlob = new Blob(agentAudioChunks, { type: 'audio/webm' });
+                    stream.getTracks().forEach(track => track.stop());
+                    isAgentRecording = false;
+                    aetherRecordBtn.classList.remove('is-recording');
+                    aetherRecordBtn.innerHTML = micIcon;
+
+                    if (audioBlob.size < 500) {
+                        agentStatus.textContent = 'Did not hear anything.';
+                        aetherRecordBtn.disabled = false;
+                        return;
+                    }
+
+                    agentStatus.textContent = 'Sending...';
+                    const reader = new FileReader();
+                    reader.readAsDataURL(audioBlob);
+                    reader.onloadend = () => {
+                        sendMessageToWS({ audio: reader.result, voiceId: agentVoiceSelect.value, sessionId });
+                        agentStatus.textContent = 'Waiting for response...';
+                    };
+                });
+
+                agentMediaRecorder.start(250);
+                agentStatus.textContent = 'Listening...';
+                aetherRecordBtn.classList.add('is-recording');
+                aetherRecordBtn.innerHTML = stopIcon;
+            } catch (error) {
+                showAgentError('Microphone access denied.');
+                agentStatus.textContent = 'Mic Error';
+            }
+        };
+
+        const stopAgentRecording = () => { if (agentMediaRecorder?.state === 'recording') agentMediaRecorder.stop(); };
+
+        // --- Event Listeners ---
+        aetherRecordBtn.addEventListener('click', () => { if (isAgentRecording) stopAgentRecording(); else startAgentRecording(); });
+        agentClearBtn.addEventListener('click', clearAgentChat);
+
+        fetchVoices();
+        initSession();
+        aetherRecordBtn.innerHTML = micIcon;
+    });
+    </script>
 </body>
 </html>

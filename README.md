@@ -53,7 +53,7 @@ Edit
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/<Priya-Diwakar>/voice-agent-ai.git
+git clone https://github.com/<>/voice-agent-ai.git
 cd voice-agent-ai
 
 2. Install dependencies
