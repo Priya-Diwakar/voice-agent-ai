@@ -22,7 +22,6 @@ def get_available_voices():
     """
     try:
         voices = client.text_to_speech.get_voices()
-        print(voices)
         return voices
     
     except Exception as e:
@@ -51,7 +50,6 @@ def generate_speech(text, voice_id="en-US-1", style="Conversational", format_typ
 if __name__ == "__main__":
     # Get voices
     voices = get_available_voices()
-    print("✅ Available Voices:", voices)
 
     # Generate speech
     text_input = "Hello Priya, your Murf AI integration is now correct."

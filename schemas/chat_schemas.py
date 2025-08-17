@@ -3,6 +3,9 @@
 from pydantic import BaseModel
 from typing import List, Optional
 
+class ChatRequest(BaseModel):
+    user_text: str
+
 class Message(BaseModel):
     """Represents a single message in the chat history."""
     role: str

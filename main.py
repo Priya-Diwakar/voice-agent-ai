@@ -5,6 +5,9 @@ from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
+from utils.chat_history import chat_histories,convert_history_to_dicts
+from utils.connection_manager import manager
+from schemas.chat_schemas import AgentChatResponse,ChatHistoryResponse,ErrorResponse,ChatRequest
 import logging
 import os
 import base64
@@ -35,15 +38,6 @@ app = FastAPI(title="SonixAI Bot AI Agent")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# --- In-memory Chat Store ---
-chat_histories = {}
-
-# --- Helper to Convert History ---
-def convert_history_to_dicts(history) -> list[dict]:
-    if not history:
-        return []
-    return [{"role": msg.role, "text": msg.parts[0].text} for msg in history]
-
 # --- Ensure API keys exist ---
 missing_keys = [
     key for key in ["ASSEMBLYAI_API_KEY", "GEMINI_API_KEY", "MURF_API_KEY"]
@@ -52,21 +46,6 @@ missing_keys = [
 if missing_keys:
     raise RuntimeError(f"Missing API keys in .env: {', '.join(missing_keys)}")
 
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: list[WebSocket] = []
-
-    async def connect(self, websocket: WebSocket):
-        await websocket.accept()
-        self.active_connections.append(websocket)
-
-    def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
-
-    async def send_message(self, message: str, websocket: WebSocket):
-        await websocket.send_text(message)
-
-manager = ConnectionManager()
 
 # Allow local frontend connections
 app.add_middleware(
@@ -75,9 +54,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-        
-        
         
         
 @app.websocket("/ws")
@@ -90,12 +66,12 @@ async def websocket_endpoint(websocket: WebSocket):
         await websocket.send_json({"text": response_text})
         
 
-
 # ---------------- Existing Routes ----------------
 @app.get("/")
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+# getting all the voices
 @app.get("/voices", response_model=list)
 async def get_voices():
     try:
@@ -116,39 +92,27 @@ async def clear_chat_history(session_id: str):
         logger.info(f"Chat history cleared for session: {session_id}")
     return JSONResponse(content={"message": "Chat history cleared."})
 
-@app.post("/agent/chat/{session_id}")
+# gives history and chats with audio url for that particular session
+@app.post("/agent/chat/{session_id}",response_model=ChatHistoryResponse)
 async def agent_chat(
-    session_id: str = Path(..., description="The unique ID for the chat session."),
-    audio_file: UploadFile = File(...),
-    voiceId: str = Form("en-US-katie")
+    session_id,
+    request:ChatRequest
 ):
     try:
-        # 1. Transcribe Audio
-        user_query_text = assemblyai_service.transcribe_audio(audio_file)
-        logger.info(f"[{session_id}] User Query: {user_query_text}")
 
-        if not user_query_text:
-            history = chat_histories.get(session_id, [])
-            return AgentChatResponse(
-                history=convert_history_to_dicts(history),
-                audio_url=None
-            )
+        user_text = request.user_text
 
-        # 2. LLM Response
-        session_history = chat_histories.get(session_id, [])
-        llm_response_text, updated_history = gemini_service.get_chat_response(
-            session_history, user_query_text
-        )
+        # 1. Load old history or create new
+        history = chat_histories.get(session_id, [])
+
+        # 3. Get Gemini response
+        assistant_text,updated_history = gemini_service.get_chat_response(history,user_text)
+
+        # 4. Add assistant reply to history
         chat_histories[session_id] = updated_history
-        logger.info(f"[{session_id}] LLM Response: {llm_response_text}")
 
-        # 3. Text-to-Speech
-        audio_url = murf_service.generate_speech(llm_response_text, voiceId)
-
-        return AgentChatResponse(
-            history=convert_history_to_dicts(updated_history),
-            audio_url=audio_url
-        )
+        # 5. Return both texts
+        return ChatHistoryResponse(history=convert_history_to_dicts(updated_history))
 
     except Exception as e:
         logger.error(f"Error in agent_chat for {session_id}: {e}", exc_info=True)
@@ -162,5 +126,3 @@ async def agent_chat(
                 "fallback_text": "I'm having trouble connecting. Please try again later."
             }
         )
-    finally:
-        await audio_file.close()

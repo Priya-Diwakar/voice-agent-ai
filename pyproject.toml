@@ -1,0 +1,17 @@
+[project]
+name = "voice-agent-ai"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "assemblyai>=0.43.1",
+    "fastapi>=0.116.1",
+    "google-generativeai>=0.8.5",
+    "jinja2>=3.1.6",
+    "murf>=2.0.2",
+    "python-dotenv>=1.1.1",
+    "python-multipart>=0.0.20",
+    "requests>=2.32.4",
+    "uvicorn[standard]>=0.35.0",
+]
